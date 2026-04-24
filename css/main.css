@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #d0a446;
+    background: #3ff;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2852,4 +2852,7 @@ code {
 }
 .tag-cloud a:hover {
   color: #8839ef;
+}
+.headband {
+  height: 0 !important;
 }
