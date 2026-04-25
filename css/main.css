@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #aa4eee;
+    background: #ff3e8b;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2713,15 +2713,17 @@ header.header {
 }
 body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 40px 20px;
 }
 .main {
-  max-width: 1000px !important;
-  width: 100% !important;
-  margin: 0 !important;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
   gap: 24px;
   align-items: flex-start;
+  justify-content: flex-start;
 }
 .column {
   width: 240px;
@@ -2992,6 +2994,7 @@ body {
 }
 .footer {
   max-width: 1000px;
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
 }
