@@ -273,6 +273,53 @@
 <noscript>
   <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
 </noscript>
+<script>
+(function() {
+  // Only show on homepage
+  var mainInner = document.querySelector('.main-inner.index');
+  if (!mainInner) return;
+
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+  var dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var today = now.getDate();
+
+  var html = '<div class="calendar-card">';
+  html += '<div class="calendar-header"><i class="fa fa-calendar-alt" style="margin-right:8px"></i>' + year + '年 ' + monthNames[month] + '</div>';
+  html += '<table class="calendar-table"><thead><tr>';
+  dayNames.forEach(function(d) { html += '<th>' + d + '</th>'; });
+  html += '</tr></thead><tbody><tr>';
+
+  for (var i = 0; i < firstDay; i++) {
+    html += '<td class="empty"></td>';
+  }
+
+  for (var day = 1; day <= daysInMonth; day++) {
+    var cls = day === today ? 'today' : '';
+    html += '<td class="' + cls + '">' + day + '</td>';
+    if ((firstDay + day) % 7 === 0 && day < daysInMonth) {
+      html += '</tr><tr>';
+    }
+  }
+
+  var remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
+  for (var i = 0; i < remaining; i++) {
+    html += '<td class="empty"></td>';
+  }
+
+  html += '</tr></tbody></table></div>';
+
+  var column = document.querySelector('.column');
+  if (column) {
+    column.insertAdjacentHTML('beforeend', html);
+  }
+})();
+</script>
 
 </body>
 </html>
