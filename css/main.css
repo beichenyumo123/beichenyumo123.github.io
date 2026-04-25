@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #3ff;
+    background: #fff;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2374,7 +2374,7 @@ mark.search-keyword {
 header.header {
   background: var(--content-bg-color);
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
 }
 @media (max-width: 991px) {
   header.header {
@@ -2546,7 +2546,7 @@ header.header {
   .sidebar-inner {
     background: var(--content-bg-color);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     box-sizing: border-box;
     color: var(--text-color);
     margin-top: 12px;
@@ -2601,7 +2601,7 @@ header.header {
 }
 .main-inner {
   background: var(--content-bg-color);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
   padding: 40px;
 }
 @media (max-width: 991px) {
@@ -2714,18 +2714,24 @@ header.header {
 .post-block {
   background: var(--content-bg-color);
   border-radius: 16px;
-  box-shadow: var(--box-shadow-inner);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
   padding: 30px;
   margin-bottom: 18px;
   transition: box-shadow 0.3s ease;
 }
 .post-block:hover {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.14);
 }
-.header-inner {
+.header {
+  overflow: hidden;
   border-radius: 16px;
-  box-shadow: var(--box-shadow-inner);
-  padding: 0 30px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+}
+.site-brand-container {
+  background: var(--content-bg-color) !important;
+}
+.site-meta {
+  padding: 24px 0 16px;
 }
 .sidebar-inner {
   border-radius: 12px;
