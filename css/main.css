@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #fff;
+    background: #146cff;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2732,6 +2732,10 @@ header.header {
 }
 .site-meta {
   padding: 24px 0 16px;
+}
+.main {
+  align-items: center;
+  min-height: 100vh;
 }
 .sidebar-inner {
   border-radius: 12px;
