@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #2affff;
+    background: #716a99;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2755,6 +2755,11 @@ header.header {
   border: 1px solid rgba(255,255,255,0.6);
   overflow: hidden;
   margin-top: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+header.header:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -10px rgba(76,79,105,0.15);
 }
 .site-brand-container {
   background: var(--content-bg-color) !important;
@@ -2796,7 +2801,7 @@ header.header {
   padding: 12px 24px;
   font-size: 14px;
   color: var(--link-color);
-  border-radius: 0;
+  border-radius: 8px;
   transition: all 0.2s ease;
   position: relative;
 }
@@ -2814,6 +2819,9 @@ header.header {
   color: var(--link-color);
   background-color: rgba(30,102,245,0.08);
   font-weight: 600;
+}
+.main-menu .menu-item.current a:hover {
+  background-color: rgba(30,102,245,0.12);
 }
 .main-menu .menu-item.current a::after {
   content: '';
@@ -2836,6 +2844,11 @@ header.header {
   text-align: center;
   max-height: none;
   margin-top: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.sidebar-inner:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -10px rgba(76,79,105,0.15);
 }
 .sidebar-nav {
   display: none !important;
