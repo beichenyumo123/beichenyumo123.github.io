@@ -314,8 +314,14 @@
   html += '<div class="calendar-footer"><a href="/archives/">所有文章 ›</a></div>';
   html += '</div>';
 
-  // Prepend to main-inner (right side, above posts)
-  mainInner.insertAdjacentHTML('afterbegin', html);
+  // Create right column and add calendar
+  var main = document.querySelector('.main');
+  if (!main) return;
+
+  var rightCol = document.createElement('div');
+  rightCol.className = 'right-column';
+  rightCol.innerHTML = html;
+  main.appendChild(rightCol);
 })();
 </script>
 

@@ -1222,7 +1222,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #ff2bff;
+    background: #1b45ff;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -2719,7 +2719,7 @@ body {
 }
 .main {
   display: flex;
-  max-width: 1000px;
+  max-width: 1240px;
   width: 100%;
   margin: 0 auto;
   gap: 24px;
@@ -2730,6 +2730,13 @@ body {
   padding-top: 40px;
 }
 .column {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.right-column {
   width: 240px;
   flex-shrink: 0;
   display: flex;
@@ -3125,7 +3132,7 @@ header.header:hover {
   box-shadow: 0 4px 12px rgba(30,102,245,0.3);
 }
 .footer {
-  max-width: 1000px;
+  max-width: 1240px;
   width: 100%;
   margin: 0 auto;
   padding: 20px;
