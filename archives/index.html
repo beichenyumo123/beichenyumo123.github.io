@@ -326,36 +326,146 @@
   <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
 </noscript>
 <script>
+// ========== Dark mode toggle (global, all pages) ==========
+(function() {
+  var storageKey = 'theme-preference';
+
+  function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(mode) {
+    if (mode === 'dark' || mode === 'light') {
+      document.documentElement.setAttribute('data-color-scheme', mode);
+    } else {
+      document.documentElement.removeAttribute('data-color-scheme');
+    }
+    updateIcons(mode);
+  }
+
+  function updateIcons(active) {
+    document.querySelectorAll('.theme-toggle-sun').forEach(function(el) {
+      el.style.display = active === 'dark' ? 'none' : '';
+    });
+    document.querySelectorAll('.theme-toggle-moon').forEach(function(el) {
+      el.style.display = active === 'dark' ? '' : 'none';
+    });
+  }
+
+  var saved = localStorage.getItem(storageKey);
+  if (saved === 'dark' || saved === 'light') {
+    applyTheme(saved);
+  } else {
+    applyTheme('auto');
+  }
+
+  var sidebarInner = document.querySelector('.sidebar-inner');
+  if (sidebarInner) {
+    var btn = document.createElement('button');
+    btn.className = 'theme-toggle-btn';
+    btn.title = '切换暗色 / 亮色模式';
+    btn.innerHTML = '<i class="fa fa-sun theme-toggle-sun"></i><i class="fa fa-moon theme-toggle-moon"></i>';
+    sidebarInner.appendChild(btn);
+
+    btn.addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-color-scheme');
+      var sys = getSystemTheme();
+      var next;
+      if (current === 'dark') {
+        next = 'light';
+      } else if (current === 'light') {
+        next = 'auto';
+      } else {
+        next = sys === 'dark' ? 'light' : 'dark';
+      }
+      if (next === 'auto') {
+        localStorage.removeItem(storageKey);
+        applyTheme('auto');
+      } else {
+        localStorage.setItem(storageKey, next);
+        applyTheme(next);
+      }
+    });
+  }
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+    if (!localStorage.getItem(storageKey)) {
+      applyTheme('auto');
+    }
+  });
+})();
+
+// ========== Calendar widget with in-page filtering (Plan B) ==========
 (function() {
   var mainInner = document.querySelector('.main-inner.index');
   if (!mainInner) return;
 
-  // Collect post data from the page DOM: date -> [{title, url}]
-  var postsByDate = {};
+  // Collect which dates have posts; tag each post-block
+  var postDates = {};
   document.querySelectorAll('.main-inner.index .post-block').forEach(function(post) {
     var timeEl = post.querySelector('.post-meta time');
-    var titleEl = post.querySelector('.post-title-link');
-    if (!timeEl || !titleEl) return;
-
+    if (!timeEl) return;
     var d = new Date(timeEl.getAttribute('datetime'));
     if (isNaN(d.getTime())) return;
-
     var dateKey = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-    if (!postsByDate[dateKey]) postsByDate[dateKey] = [];
-    postsByDate[dateKey].push({
-      title: titleEl.textContent.trim(),
-      url: titleEl.getAttribute('href')
-    });
+    post.setAttribute('data-post-date', dateKey);
+    postDates[dateKey] = true;
   });
 
   var now = new Date();
   var viewYear = now.getFullYear();
   var viewMonth = now.getMonth();
+  var activeDate = null;
   var monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
   var dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
   var container = document.createElement('div');
   container.className = 'right-column';
+
+  function filterPosts(dateKey) {
+    // Toggle: click same date → clear filter
+    if (activeDate === dateKey) {
+      clearFilter();
+      return;
+    }
+    activeDate = dateKey;
+    document.querySelectorAll('.main-inner.index .post-block').forEach(function(p) {
+      p.classList.toggle('post-hidden', p.getAttribute('data-post-date') !== dateKey);
+    });
+
+    // Add clear-filter hint
+    var footer = container.querySelector('.calendar-footer');
+    if (footer && !footer.querySelector('.cal-clear')) {
+      var clear = document.createElement('span');
+      clear.className = 'cal-clear';
+      clear.textContent = ' | ';
+      var link = document.createElement('a');
+      link.href = 'javascript:void(0)';
+      link.textContent = '清除筛选';
+      link.addEventListener('click', function(e) { e.preventDefault(); clearFilter(); });
+      clear.appendChild(link);
+      footer.prepend(clear);
+    }
+
+    // Highlight active cell
+    updateActiveCell();
+  }
+
+  function clearFilter() {
+    activeDate = null;
+    document.querySelectorAll('.main-inner.index .post-block').forEach(function(p) {
+      p.classList.remove('post-hidden');
+    });
+    var clearEl = container.querySelector('.cal-clear');
+    if (clearEl) clearEl.remove();
+    updateActiveCell();
+  }
+
+  function updateActiveCell() {
+    container.querySelectorAll('.cal-cell').forEach(function(c) {
+      c.classList.toggle('active', c.getAttribute('data-date') === activeDate);
+    });
+  }
 
   function renderCalendar(year, month) {
     var firstDay = new Date(year, month, 1).getDay();
@@ -366,55 +476,40 @@
 
     var html = '<div class="calendar-card">';
 
-    // Header
     html += '<div class="calendar-header">';
     html += '<button class="cal-nav cal-prev" aria-label="上月">‹</button>';
     html += '<span class="cal-title"><i class="fa fa-calendar-alt"></i>' + year + '年 ' + monthNames[month] + '</span>';
     html += '<button class="cal-nav cal-next" aria-label="下月">›</button>';
     html += '</div>';
 
-    // Grid
     html += '<div class="calendar-grid">';
-
-    // Day headers
     for (var d = 0; d < 7; d++) {
       html += '<div class="cal-head">' + dayNames[d] + '</div>';
     }
-
-    // Empty cells at start
     for (var i = 0; i < firstDay; i++) {
       html += '<div class="cal-cell empty"></div>';
     }
-
-    // Day cells
     for (var day = 1; day <= daysInMonth; day++) {
       var dateKey = year + '-' + (month + 1) + '-' + day;
       var cls = 'cal-cell';
       if (isCurrentMonth && day === todayDate) cls += ' today';
-      if (postsByDate[dateKey]) cls += ' has-post';
-
-      html += '<div class="' + cls + '" data-date="' + dateKey + '">';
-      html += '<span>' + day + '</span>';
-      html += '</div>';
+      if (postDates[dateKey]) cls += ' has-post';
+      if (dateKey === activeDate) cls += ' active';
+      html += '<div class="' + cls + '" data-date="' + dateKey + '"><span>' + day + '</span></div>';
     }
-
-    // Fill remaining empty cells in last row
     var total = firstDay + daysInMonth;
     var remaining = (7 - (total % 7)) % 7;
     for (var j = 0; j < remaining; j++) {
       html += '<div class="cal-cell empty"></div>';
     }
-
     html += '</div>';
 
-    // Footer
     html += '<div class="calendar-footer"><a href="/archives/">所有文章 ›</a></div>';
     html += '</div>';
     return html;
   }
 
   container.innerHTML = renderCalendar(viewYear, viewMonth);
-
   var main = document.querySelector('.main');
   if (!main) return;
   main.appendChild(container);
@@ -430,54 +525,16 @@
       viewMonth++;
       if (viewMonth > 11) { viewMonth = 0; viewYear++; }
     }
+    activeDate = null;
+    clearFilter();
     container.innerHTML = renderCalendar(viewYear, viewMonth);
   });
 
-  // Popup for post links
-  var popup = null;
-  function closePopup() {
-    if (popup) { popup.remove(); popup = null; }
-    document.removeEventListener('click', onDocClick);
-  }
-  function onDocClick(e) {
-    if (popup && !popup.contains(e.target) && !e.target.closest('.has-post')) {
-      closePopup();
-    }
-  }
-
+  // Date click → filter
   container.addEventListener('click', function(e) {
-    var cell = e.target.closest('.has-post');
+    var cell = e.target.closest('.cal-cell.has-post');
     if (!cell) return;
-    var dateKey = cell.getAttribute('data-date');
-    var posts = postsByDate[dateKey];
-    if (!posts || !posts.length) return;
-
-    closePopup();
-
-    popup = document.createElement('div');
-    popup.className = 'calendar-popup';
-    var listHtml = '<ul>';
-    posts.forEach(function(p) {
-      listHtml += '<li><a href="' + p.url + '">' + p.title + '</a></li>';
-    });
-    listHtml += '</ul>';
-    popup.innerHTML = listHtml;
-
-    var rect = cell.getBoundingClientRect();
-    popup.style.position = 'fixed';
-    popup.style.top = (rect.bottom + 6) + 'px';
-    popup.style.left = rect.left + 'px';
-    popup.style.zIndex = '9999';
-    document.body.appendChild(popup);
-
-    var popRect = popup.getBoundingClientRect();
-    if (popRect.right > window.innerWidth - 10) {
-      popup.style.left = (window.innerWidth - popRect.width - 10) + 'px';
-    }
-
-    setTimeout(function() {
-      document.addEventListener('click', onDocClick);
-    }, 0);
+    filterPosts(cell.getAttribute('data-date'));
   });
 })();
 </script>
