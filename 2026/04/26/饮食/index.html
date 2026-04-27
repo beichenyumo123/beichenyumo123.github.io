@@ -489,21 +489,11 @@
     btn.addEventListener('click', function() {
       var current = document.documentElement.getAttribute('data-color-scheme');
       var sys = getSystemTheme();
-      var next;
-      if (current === 'dark') {
-        next = 'light';
-      } else if (current === 'light') {
-        next = 'auto';
-      } else {
-        next = sys === 'dark' ? 'light' : 'dark';
-      }
-      if (next === 'auto') {
-        localStorage.removeItem(storageKey);
-        applyTheme('auto');
-      } else {
-        localStorage.setItem(storageKey, next);
-        applyTheme(next);
-      }
+      // Determine effective visible theme and toggle to opposite
+      var effective = current || sys;
+      var next = effective === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(storageKey, next);
+      applyTheme(next);
     });
   }
 
