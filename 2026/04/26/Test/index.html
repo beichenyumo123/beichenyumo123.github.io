@@ -362,41 +362,49 @@
     var todayDate = today.getDate();
 
     var html = '<div class="calendar-card">';
+
+    // Header
     html += '<div class="calendar-header">';
-    html += '<button class="cal-prev" aria-label="上月">‹</button>';
+    html += '<button class="cal-nav cal-prev" aria-label="上月">‹</button>';
     html += '<span class="cal-title"><i class="fa fa-calendar-alt"></i>' + year + '年 ' + monthNames[month] + '</span>';
-    html += '<button class="cal-next" aria-label="下月">›</button>';
+    html += '<button class="cal-nav cal-next" aria-label="下月">›</button>';
     html += '</div>';
 
-    html += '<table class="calendar-table"><thead><tr>';
-    dayNames.forEach(function(d) { html += '<th>' + d + '</th>'; });
-    html += '</tr></thead><tbody><tr>';
+    // Grid
+    html += '<div class="calendar-grid">';
 
-    for (var i = 0; i < firstDay; i++) {
-      html += '<td class="empty"><span></span></td>';
+    // Day headers
+    for (var d = 0; d < 7; d++) {
+      html += '<div class="cal-head">' + dayNames[d] + '</div>';
     }
 
+    // Empty cells at start
+    for (var i = 0; i < firstDay; i++) {
+      html += '<div class="cal-cell empty"></div>';
+    }
+
+    // Day cells
     for (var day = 1; day <= daysInMonth; day++) {
       var dateKey = year + '-' + (month + 1) + '-' + day;
-      var cls = [];
-      if (isCurrentMonth && day === todayDate) cls.push('today');
-      if (postsByDate[dateKey]) cls.push('has-post');
+      var cls = 'cal-cell';
+      if (isCurrentMonth && day === todayDate) cls += ' today';
+      if (postsByDate[dateKey]) cls += ' has-post';
 
-      html += '<td class="' + cls.join(' ') + '" data-date="' + dateKey + '">';
+      html += '<div class="' + cls + '" data-date="' + dateKey + '">';
       html += '<span>' + day + '</span>';
-      html += '</td>';
-
-      if ((firstDay + day) % 7 === 0 && day < daysInMonth) {
-        html += '</tr><tr>';
-      }
+      html += '</div>';
     }
 
-    var remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
-    for (var i = 0; i < remaining; i++) {
-      html += '<td class="empty"><span></span></td>';
+    // Fill remaining empty cells in last row
+    var total = firstDay + daysInMonth;
+    var remaining = (7 - (total % 7)) % 7;
+    for (var j = 0; j < remaining; j++) {
+      html += '<div class="cal-cell empty"></div>';
     }
 
-    html += '</tr></tbody></table>';
+    html += '</div>';
+
+    // Footer
     html += '<div class="calendar-footer"><a href="/archives/">所有文章 ›</a></div>';
     html += '</div>';
     return html;
@@ -410,7 +418,7 @@
 
   // Month navigation
   container.addEventListener('click', function(e) {
-    var btn = e.target.closest('.cal-prev, .cal-next');
+    var btn = e.target.closest('.cal-nav');
     if (!btn) return;
     if (btn.classList.contains('cal-prev')) {
       viewMonth--;
@@ -459,7 +467,6 @@
     popup.style.zIndex = '9999';
     document.body.appendChild(popup);
 
-    // Adjust if overflows right edge
     var popRect = popup.getBoundingClientRect();
     if (popRect.right > window.innerWidth - 10) {
       popup.style.left = (window.innerWidth - popRect.width - 10) + 'px';
