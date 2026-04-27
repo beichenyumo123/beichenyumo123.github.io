@@ -1432,7 +1432,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #1bff74;
+    background: #fef0c8;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -3224,70 +3224,98 @@ header.header:hover {
   box-shadow: 0 20px 40px -10px rgba(76,79,105,0.15);
 }
 .calendar-header {
-  text-align: center;
-  font-size: 15px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 16px;
   color: var(--text-color);
+}
+.cal-title {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-prev,
+.cal-next {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 16px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+}
+.cal-prev:hover,
+.cal-next:hover {
+  background: var(--card-bg-color);
+  color: var(--link-color);
 }
 .calendar-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 4px;
   table-layout: fixed;
 }
 .calendar-table th {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--blockquote-color);
   font-weight: 500;
-  padding: 6px 0;
+  padding: 4px 0;
   text-align: center;
 }
 .calendar-table td {
   text-align: center;
   font-size: 13px;
-  padding: 8px 0;
   color: var(--text-color);
   border-radius: 8px;
   width: 14.28%;
   position: relative;
+  cursor: default;
+  transition: all 0.2s ease;
+  padding: 0;
 }
-.calendar-table td.today {
-  background-color: var(--link-color);
-  color: var(--content-bg-color);
-  font-weight: 600;
+.calendar-table td > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
-.calendar-table td.has-post {
+.calendar-table td:not(.empty):hover > span {
+  background: var(--card-bg-color);
+}
+.calendar-table td.today > span {
+  border: 2px solid var(--link-color);
+  color: var(--link-color);
+  font-weight: 700;
+}
+.calendar-table td.has-post > span {
+  background: rgba(30,102,245,0.08);
+  color: var(--link-color);
   font-weight: 600;
   cursor: pointer;
 }
-.calendar-table td.has-post::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: var(--link-color);
+.calendar-table td.has-post:hover > span {
+  background: var(--link-color);
+  color: var(--content-bg-color);
 }
-.calendar-table td.today.has-post::after {
-  background-color: var(--content-bg-color);
-}
-.calendar-table td.has-post a {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-  width: 100%;
-  height: 100%;
-}
-.calendar-table td.has-post a:hover {
+.calendar-table td.today.has-post > span {
+  background: rgba(30,102,245,0.08);
   color: var(--link-color);
+  border: 2px solid var(--link-color);
 }
-.calendar-table td.today.has-post a:hover {
+.calendar-table td.today.has-post:hover > span {
+  background: var(--link-color);
   color: var(--content-bg-color);
 }
 .calendar-table td.empty {
@@ -3307,6 +3335,40 @@ header.header:hover {
 }
 .calendar-footer a:hover {
   text-decoration: underline;
+}
+.calendar-popup {
+  background: var(--content-bg-color);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 12px 16px;
+  min-width: 180px;
+  max-width: 260px;
+  animation: calPopupIn 0.2s ease;
+}
+.calendar-popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.calendar-popup li {
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+.calendar-popup li:last-child {
+  border-bottom: none;
+}
+.calendar-popup a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 13px;
+  display: block;
+  transition: color 0.2s ease;
+  line-height: 1.4;
+}
+.calendar-popup a:hover {
+  color: var(--link-color);
 }
 .post-block {
   background: var(--content-bg-color);
@@ -3555,6 +3617,24 @@ blockquote p {
   .alert:hover {
     box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
   }
+  .calendar-popup {
+    border-color: rgba(255,255,255,0.08);
+  }
+  .calendar-table td.has-post > span {
+    background: rgba(138,173,244,0.12);
+  }
+  .calendar-table td.has-post:hover > span {
+    background: #8aadf4;
+    color: #1e2030;
+  }
+  .calendar-table td.today.has-post > span {
+    background: rgba(138,173,244,0.12);
+    border-color: #8aadf4;
+  }
+  .calendar-table td.today.has-post:hover > span {
+    background: #8aadf4;
+    color: #1e2030;
+  }
 }
 code {
   font-family: 'Maple Mono', 'TsangerJinKai05', monospace, consolas, Menlo, monospace;
@@ -3737,5 +3817,15 @@ code {
   code {
     color: #ed8796;
     background: #363a4f;
+  }
+}
+@keyframes calPopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

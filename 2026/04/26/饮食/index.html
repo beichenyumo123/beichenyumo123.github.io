@@ -449,76 +449,148 @@
   var mainInner = document.querySelector('.main-inner.index');
   if (!mainInner) return;
 
-  // Collect post dates from the page DOM
-  var postDates = [];
-  document.querySelectorAll('.main-inner.index .post-meta time').forEach(function(el) {
-    var d = new Date(el.getAttribute('datetime'));
-    if (!isNaN(d.getTime())) {
-      postDates.push(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate());
-    }
+  // Collect post data from the page DOM: date -> [{title, url}]
+  var postsByDate = {};
+  document.querySelectorAll('.main-inner.index .post-block').forEach(function(post) {
+    var timeEl = post.querySelector('.post-meta time');
+    var titleEl = post.querySelector('.post-title-link');
+    if (!timeEl || !titleEl) return;
+
+    var d = new Date(timeEl.getAttribute('datetime'));
+    if (isNaN(d.getTime())) return;
+
+    var dateKey = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    if (!postsByDate[dateKey]) postsByDate[dateKey] = [];
+    postsByDate[dateKey].push({
+      title: titleEl.textContent.trim(),
+      url: titleEl.getAttribute('href')
+    });
   });
 
   var now = new Date();
-  var year = now.getFullYear();
-  var month = now.getMonth();
+  var viewYear = now.getFullYear();
+  var viewMonth = now.getMonth();
   var monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
   var dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
-  var firstDay = new Date(year, month, 1).getDay();
-  var daysInMonth = new Date(year, month + 1, 0).getDate();
-  var today = now.getDate();
-  var monthStr = String(month + 1).padStart(2, '0');
+  var container = document.createElement('div');
+  container.className = 'right-column';
 
-  // Deduplicate dates
-  var hasPost = {};
-  postDates.forEach(function(d) { hasPost[d] = true; });
+  function renderCalendar(year, month) {
+    var firstDay = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var today = new Date();
+    var isCurrentMonth = (year === today.getFullYear() && month === today.getMonth());
+    var todayDate = today.getDate();
 
-  var html = '<div class="calendar-card">';
-  html += '<div class="calendar-header"><i class="fa fa-calendar-alt" style="margin-right:6px"></i>' + year + '年 ' + monthNames[month] + '</div>';
-  html += '<table class="calendar-table"><thead><tr>';
-  dayNames.forEach(function(d) { html += '<th>' + d + '</th>'; });
-  html += '</tr></thead><tbody><tr>';
+    var html = '<div class="calendar-card">';
+    html += '<div class="calendar-header">';
+    html += '<button class="cal-prev" aria-label="上月">‹</button>';
+    html += '<span class="cal-title"><i class="fa fa-calendar-alt"></i>' + year + '年 ' + monthNames[month] + '</span>';
+    html += '<button class="cal-next" aria-label="下月">›</button>';
+    html += '</div>';
 
-  for (var i = 0; i < firstDay; i++) {
-    html += '<td class="empty"></td>';
-  }
+    html += '<table class="calendar-table"><thead><tr>';
+    dayNames.forEach(function(d) { html += '<th>' + d + '</th>'; });
+    html += '</tr></thead><tbody><tr>';
 
-  for (var day = 1; day <= daysInMonth; day++) {
-    var dateKey = year + '-' + (month + 1) + '-' + day;
-    var cls = [];
-    if (day === today) cls.push('today');
-    if (hasPost[dateKey]) cls.push('has-post');
-
-    html += '<td class="' + cls.join(' ') + '">';
-    if (hasPost[dateKey]) {
-      html += '<a href="/archives/' + year + '/' + monthStr + '/" title="' + year + '年' + (month + 1) + '月文章">' + day + '</a>';
-    } else {
-      html += day;
+    for (var i = 0; i < firstDay; i++) {
+      html += '<td class="empty"><span></span></td>';
     }
-    html += '</td>';
 
-    if ((firstDay + day) % 7 === 0 && day < daysInMonth) {
-      html += '</tr><tr>';
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dateKey = year + '-' + (month + 1) + '-' + day;
+      var cls = [];
+      if (isCurrentMonth && day === todayDate) cls.push('today');
+      if (postsByDate[dateKey]) cls.push('has-post');
+
+      html += '<td class="' + cls.join(' ') + '" data-date="' + dateKey + '">';
+      html += '<span>' + day + '</span>';
+      html += '</td>';
+
+      if ((firstDay + day) % 7 === 0 && day < daysInMonth) {
+        html += '</tr><tr>';
+      }
     }
+
+    var remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
+    for (var i = 0; i < remaining; i++) {
+      html += '<td class="empty"><span></span></td>';
+    }
+
+    html += '</tr></tbody></table>';
+    html += '<div class="calendar-footer"><a href="/archives/">所有文章 ›</a></div>';
+    html += '</div>';
+    return html;
   }
 
-  var remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
-  for (var i = 0; i < remaining; i++) {
-    html += '<td class="empty"></td>';
-  }
+  container.innerHTML = renderCalendar(viewYear, viewMonth);
 
-  html += '</tr></tbody></table>';
-  html += '<div class="calendar-footer"><a href="/archives/">所有文章 ›</a></div>';
-  html += '</div>';
-
-  // Create right column and add calendar
   var main = document.querySelector('.main');
   if (!main) return;
+  main.appendChild(container);
 
-  var rightCol = document.createElement('div');
-  rightCol.className = 'right-column';
-  rightCol.innerHTML = html;
-  main.appendChild(rightCol);
+  // Month navigation
+  container.addEventListener('click', function(e) {
+    var btn = e.target.closest('.cal-prev, .cal-next');
+    if (!btn) return;
+    if (btn.classList.contains('cal-prev')) {
+      viewMonth--;
+      if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    } else {
+      viewMonth++;
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    }
+    container.innerHTML = renderCalendar(viewYear, viewMonth);
+  });
+
+  // Popup for post links
+  var popup = null;
+  function closePopup() {
+    if (popup) { popup.remove(); popup = null; }
+    document.removeEventListener('click', onDocClick);
+  }
+  function onDocClick(e) {
+    if (popup && !popup.contains(e.target) && !e.target.closest('.has-post')) {
+      closePopup();
+    }
+  }
+
+  container.addEventListener('click', function(e) {
+    var cell = e.target.closest('.has-post');
+    if (!cell) return;
+    var dateKey = cell.getAttribute('data-date');
+    var posts = postsByDate[dateKey];
+    if (!posts || !posts.length) return;
+
+    closePopup();
+
+    popup = document.createElement('div');
+    popup.className = 'calendar-popup';
+    var listHtml = '<ul>';
+    posts.forEach(function(p) {
+      listHtml += '<li><a href="' + p.url + '">' + p.title + '</a></li>';
+    });
+    listHtml += '</ul>';
+    popup.innerHTML = listHtml;
+
+    var rect = cell.getBoundingClientRect();
+    popup.style.position = 'fixed';
+    popup.style.top = (rect.bottom + 6) + 'px';
+    popup.style.left = rect.left + 'px';
+    popup.style.zIndex = '9999';
+    document.body.appendChild(popup);
+
+    // Adjust if overflows right edge
+    var popRect = popup.getBoundingClientRect();
+    if (popRect.right > window.innerWidth - 10) {
+      popup.style.left = (window.innerWidth - popRect.width - 10) + 'px';
+    }
+
+    setTimeout(function() {
+      document.addEventListener('click', onDocClick);
+    }, 0);
+  });
 })();
 </script>
 
