@@ -1432,7 +1432,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #ccc2f7;
+    background: #ffaca1;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -3857,11 +3857,9 @@ code {
 .theme-toggle-btn:hover {
   opacity: 0.85;
 }
-.theme-toggle-btn .fa-sun {
-  display: none;
-}
+.theme-toggle-btn .fa-sun,
 .theme-toggle-btn .fa-moon {
-  display: block;
+  display: none;
 }
 html[data-color-scheme="dark"] {
   --body-bg-color: #24273a;
